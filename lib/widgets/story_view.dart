@@ -121,7 +121,7 @@ class StoryItem {
     return StoryItem(
       Container(
         key: key,
-        color: Colors.black,
+        color: Colors.white,
         child: Stack(
           children: <Widget>[
             StoryImage.url(
