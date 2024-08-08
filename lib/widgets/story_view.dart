@@ -121,7 +121,7 @@ class StoryItem {
     return StoryItem(
       Container(
         key: key,
-        color: Colors.white,
+        color: Color(0xFF222222),
         child: Stack(
           children: <Widget>[
             StoryImage.url(
@@ -797,7 +797,7 @@ class PageBarState extends State<PageBar> {
             child: StoryProgressIndicator(
               isPlaying(it) ? widget.animation!.value : (it.shown ? 1 : 0),
               indicatorHeight:
-                  widget.indicatorHeight == IndicatorHeight.large ? 5 : widget.indicatorHeight == IndicatorHeight.medium ? 3 : 2,
+                  widget.indicatorHeight == IndicatorHeight.large ? 4 : widget.indicatorHeight == IndicatorHeight.medium ? 3 : 2,
               indicatorColor: widget.indicatorColor,
               indicatorForegroundColor: widget.indicatorForegroundColor,
             ),
