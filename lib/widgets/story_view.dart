@@ -819,7 +819,7 @@ class StoryProgressIndicator extends StatelessWidget {
 
   StoryProgressIndicator(
     this.value, {
-    this.indicatorHeight = 5,
+    this.indicatorHeight = 10,
     this.indicatorColor,
     this.indicatorForegroundColor,
   });
