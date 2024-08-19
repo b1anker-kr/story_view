@@ -522,6 +522,17 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     }
   }
 
+    // 새로운 함수 추가
+  void _setStoryItems(int startIndex) {
+    final firstPage = widget.storyItems[startIndex];
+    if (firstPage == null) return;
+
+    // 시작 인덱스 이후의 항목들에 대해 `shown` 상태를 설정합니다.
+    widget.storyItems
+      .sublist(startIndex)
+      .forEach((item) => item!.shown = false);
+  }
+
   void _play() {
     _animationController?.dispose();
     // 시작 인덱스에서부터 스토리를 찾습니다.
