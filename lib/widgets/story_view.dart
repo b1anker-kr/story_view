@@ -414,6 +414,7 @@ class StoryView extends StatefulWidget {
 
   /// Use this if you want to give outer padding to the indicator
   final EdgeInsetsGeometry indicatorOuterPadding;
+  final int startIndex;
 
   StoryView({
     required this.storyItems,
@@ -428,6 +429,7 @@ class StoryView extends StatefulWidget {
     this.indicatorForegroundColor,
     this.indicatorHeight = IndicatorHeight.large,
     this.indicatorOuterPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8,),
+    this.startIndex = 0, 
   });
 
   @override
@@ -458,6 +460,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+     final startIndex = widget.startIndex.clamp(0, widget.storyItems.length - 1);
+    _setStoryItems(startIndex);
 
     // All pages after the first unshown page should have their shown value as
     // false
@@ -520,19 +524,17 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
   void _play() {
     _animationController?.dispose();
-    // get the next playing page
-    final storyItem = widget.storyItems.firstWhere((it) {
-      return !it!.shown;
-    })!;
+    // 시작 인덱스에서부터 스토리를 찾습니다.
+    final startIndex = widget.startIndex.clamp(0, widget.storyItems.length - 1);
+    final storyItem = widget.storyItems[startIndex];
 
-    final storyItemIndex = widget.storyItems.indexOf(storyItem);
+    if (storyItem == null) return;
 
     if (widget.onStoryShow != null) {
-      widget.onStoryShow!(storyItem, storyItemIndex);
+      widget.onStoryShow!(storyItem, startIndex);
     }
 
-    _animationController =
-        AnimationController(duration: storyItem.duration, vsync: this);
+    _animationController = AnimationController(duration: storyItem.duration, vsync: this);
 
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -546,8 +548,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       }
     });
 
-    _currentAnimation =
-        Tween(begin: 0.0, end: 1.0).animate(_animationController!);
+    _currentAnimation = Tween(begin: 0.0, end: 1.0).animate(_animationController!);
 
     widget.controller.play();
   }
