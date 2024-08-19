@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 
 import '../controller/story_controller.dart';
@@ -27,7 +26,41 @@ class StoryItem {
     this.shown = false,
   });
 
-  // Other factory constructors (text, pageImage, inlineImage, etc.) are unchanged
+  factory StoryItem.pageImage(Image image, {required Duration duration}) {
+    return StoryItem(
+      StoryImage(image),
+      duration: duration,
+    );
+  }
+
+  factory StoryItem.inlineImage(Image image, {required Duration duration}) {
+    return StoryItem(
+      StoryImage(image),
+      duration: duration,
+    );
+  }
+
+  factory StoryItem.text(String text, {required Duration duration}) {
+    return StoryItem(
+      Container(
+        color: Colors.black,
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(color: Colors.white, fontSize: 24),
+          ),
+        ),
+      ),
+      duration: duration,
+    );
+  }
+
+  factory StoryItem.pageVideo(VideoPlayerController videoController, {required Duration duration}) {
+    return StoryItem(
+      StoryVideo(videoController),
+      duration: duration,
+    );
+  }
 }
 
 /// Widget to display stories just like Whatsapp and Instagram. Can also be used
@@ -298,24 +331,41 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     return Container(
       color: Colors.white,
       child: Stack(
-        children: <Widget>[
-          _currentView,
-          Visibility(
-            visible: widget.progressPosition != ProgressPosition.none,
-            child: Align(
-              alignment: widget.progressPosition == ProgressPosition.top
-                  ? Alignment.topCenter
-                  : Alignment.bottomCenter,
-              child: SafeArea(
-                bottom: widget.inline ? false : true,
-                child: Container(
-                  padding: widget.indicatorOuterPadding,
-                  child: ProgressIndicator(
-                    color: widget.indicatorColor,
-                    foregroundColor: widget.indicatorForegroundColor,
-                    height: widget.indicatorHeight,
-                    value: _currentAnimation?.value,
-                  ),
+        children: [
+          GestureDetector(
+            onVerticalDragUpdate: (details) {
+              verticalDragInfo = VerticalDragInfo(
+                context: context,
+                details: details,
+                controller: widget.controller,
+                onVerticalSwipeComplete: widget.onVerticalSwipeComplete,
+              );
+              verticalDragInfo?.handleSwipe();
+            },
+            onVerticalDragEnd: (details) {
+              verticalDragInfo?.handleDragEnd();
+            },
+            child: Center(
+              child: _currentView,
+            ),
+          ),
+          Align(
+            alignment: widget.progressPosition == ProgressPosition.top
+                ? Alignment.topCenter
+                : Alignment.bottomCenter,
+            child: Padding(
+              padding: widget.indicatorOuterPadding,
+              child: SizedBox(
+                height: widget.indicatorHeight == IndicatorHeight.small
+                    ? 3
+                    : widget.indicatorHeight == IndicatorHeight.medium
+                        ? 5
+                        : 7,
+                child: LinearProgressIndicator(
+                  color: widget.indicatorColor,
+                  backgroundColor: Colors.transparent,
+                  valueColor: AlwaysStoppedAnimation(widget.indicatorForegroundColor),
+                  value: _currentAnimation?.value,
                 ),
               ),
             ),
@@ -326,13 +376,26 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   }
 }
 
-enum PlaybackState { play, pause, next, previous }
+class VerticalDragInfo {
+  final BuildContext context;
+  final DragUpdateDetails details;
+  final StoryController controller;
+  final Function(Direction?)? onVerticalSwipeComplete;
 
-class StoryController {
-  final Stream<PlaybackState> playbackNotifier;
+  VerticalDragInfo({
+    required this.context,
+    required this.details,
+    required this.controller,
+    this.onVerticalSwipeComplete,
+  });
 
-  StoryController(this.playbackNotifier);
+  void handleSwipe() {
+    // Implement swipe handling logic here
+  }
 
-  void play() {}
-  void pause() {}
+  void handleDragEnd() {
+    // Implement drag end handling logic here
+  }
 }
+
+enum Direction { up, down }
