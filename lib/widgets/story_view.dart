@@ -414,7 +414,6 @@ class StoryView extends StatefulWidget {
 
   /// Use this if you want to give outer padding to the indicator
   final EdgeInsetsGeometry indicatorOuterPadding;
-  final int startIndex;
 
   StoryView({
     required this.storyItems,
@@ -429,7 +428,6 @@ class StoryView extends StatefulWidget {
     this.indicatorForegroundColor,
     this.indicatorHeight = IndicatorHeight.large,
     this.indicatorOuterPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 8,),
-    this.startIndex = 0, 
   });
 
   @override
@@ -460,8 +458,6 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-     final startIndex = widget.startIndex.clamp(0, widget.storyItems.length - 1);
-    _setStoryItems(startIndex);
 
     // All pages after the first unshown page should have their shown value as
     // false
@@ -522,30 +518,21 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     }
   }
 
-    // 새로운 함수 추가
-  void _setStoryItems(int startIndex) {
-    final firstPage = widget.storyItems[startIndex];
-    if (firstPage == null) return;
-
-    // 시작 인덱스 이후의 항목들에 대해 `shown` 상태를 설정합니다.
-    widget.storyItems
-      .sublist(startIndex)
-      .forEach((item) => item!.shown = false);
-  }
-
   void _play() {
     _animationController?.dispose();
-    // 시작 인덱스에서부터 스토리를 찾습니다.
-    final startIndex = widget.startIndex.clamp(0, widget.storyItems.length - 1);
-    final storyItem = widget.storyItems[startIndex];
+    // get the next playing page
+    final storyItem = widget.storyItems.firstWhere((it) {
+      return !it!.shown;
+    })!;
 
-    if (storyItem == null) return;
+    final storyItemIndex = widget.storyItems.indexOf(storyItem);
 
     if (widget.onStoryShow != null) {
-      widget.onStoryShow!(storyItem, startIndex);
+      widget.onStoryShow!(storyItem, storyItemIndex);
     }
 
-    _animationController = AnimationController(duration: storyItem.duration, vsync: this);
+    _animationController =
+        AnimationController(duration: storyItem.duration, vsync: this);
 
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -559,7 +546,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       }
     });
 
-    _currentAnimation = Tween(begin: 0.0, end: 1.0).animate(_animationController!);
+    _currentAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_animationController!);
 
     widget.controller.play();
   }
